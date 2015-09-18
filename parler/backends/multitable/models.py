@@ -65,10 +65,10 @@ from django.utils.functional import lazy
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 from django.utils import six
 from parler import signals
-from parler.bases.models import TranslationDoesNotExist
+from parler.bases.models import TranslationDoesNotExist, TranslatedFieldsBase
 from parler.cache import MISSING, _cache_translation, _cache_translation_needs_fallback, _delete_cached_translation, get_cached_translation, _delete_cached_translations, get_cached_translated_field
 from parler.fields import TranslatedField, LanguageCodeDescriptor, TranslatedFieldDescriptor
-from parler.managers import TranslatableManager
+from .managers import TranslatableManager
 from parler.utils import compat
 from parler.utils.i18n import normalize_language_code, get_language_settings, get_language_title
 import sys
@@ -149,41 +149,9 @@ def create_translations_model(shared_model, related_name, meta, **fields):
     return translations_model
 
 
-class TranslatedFields(object):
-    """
-    Wrapper class to define translated fields on a model.
-
-    The field name becomes the related name of the :class:`TranslatedFieldsModel` subclass.
-
-    Example:
-
-    .. code-block:: python
-
-        from django.db import models
-        from parler.models import TranslatableModel, TranslatedFields
-
-        class MyModel(TranslatableModel):
-            translations = TranslatedFields(
-                title = models.CharField("Title", max_length=200)
-            )
-
-    When the class is initialized, the attribute will point
-    to a :class:`~django.db.models.fields.related.ForeignRelatedObjectsDescriptor` object.
-    Hence, accessing ``MyModel.translations.related.model`` returns the original model
-    via the :class:`django.db.models.related.RelatedObject` class.
-
-    ..
-       To fetch the attribute, you can also query the Parler metadata:
-       MyModel._parler_meta.get_model_by_related_name('translations')
-    """
-    def __init__(self, meta=None, **fields):
-        self.fields = fields
-        self.meta = meta
-        self.name = None
-
+class TranslatedFields(TranslatedFieldsBase):
     def contribute_to_class(self, cls, name):
-        # Called from django.db.models.base.ModelBase.__new__
-        self.name = name
+        super(TranslatedFields, self).contribute_to_class(cls, name)
         create_translations_model(cls, name, self.meta, **self.fields)
 
 
