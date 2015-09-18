@@ -5,6 +5,7 @@ from django.conf import settings
 from parler.utils import normalize_language_code
 from parler.utils.conf import add_default_language_settings
 
+PARLER_BACKEND = getattr(settings, 'PARLER_BACKEND', 'parler.backends.multitable')
 
 PARLER_DEFAULT_LANGUAGE_CODE = getattr(settings, 'PARLER_DEFAULT_LANGUAGE_CODE', settings.LANGUAGE_CODE)
 
