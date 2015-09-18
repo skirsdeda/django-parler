@@ -57,7 +57,7 @@ from __future__ import unicode_literals
 from collections import defaultdict
 import django
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldError, ObjectDoesNotExist
+from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldError
 from django.db import models, router
 from django.db.models.base import ModelBase
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
@@ -65,6 +65,7 @@ from django.utils.functional import lazy
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 from django.utils import six
 from parler import signals
+from parler.bases.models import TranslationDoesNotExist
 from parler.cache import MISSING, _cache_translation, _cache_translation_needs_fallback, _delete_cached_translation, get_cached_translation, _delete_cached_translations, get_cached_translated_field
 from parler.fields import TranslatedField, LanguageCodeDescriptor, TranslatedFieldDescriptor
 from parler.managers import TranslatableManager
@@ -83,28 +84,8 @@ __all__ = (
     'TranslatedFields',
     'TranslatedFieldsModel',
     'TranslatedFieldsModelBase',
-    'TranslationDoesNotExist',
     #'create_translations_model',
 )
-
-
-class TranslationDoesNotExist(AttributeError, ObjectDoesNotExist):
-    """
-    A tagging interface to detect missing translations.
-    The exception inherits from :class:`~exceptions.AttributeError` to reflect what is actually happening.
-    Therefore it also causes the templates to handle the missing attributes silently, which is very useful in the admin for example.
-    The exception also inherits from :class:`~django.core.exceptions.ObjectDoesNotExist`,
-    so any code that checks for this can deal with missing translations out of the box.
-
-    This class is also used in the ``DoesNotExist`` object on the translated model, which inherits from:
-
-    * this class
-    * the ``sharedmodel.DoesNotExist`` class
-    * the original ``translatedmodel.DoesNotExist`` class.
-
-    This makes sure that the regular code flow is decently handled by existing exception handlers.
-    """
-    pass
 
 
 _lazy_verbose_name = lazy(lambda x: ugettext("{0} Translation").format(x._meta.verbose_name), six.text_type)

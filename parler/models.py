@@ -55,15 +55,17 @@ The manager and queryset objects of django-parler can work together with django-
 """
 from django.utils.importlib import import_module
 from parler import appsettings
+from parler.bases.models import TranslationDoesNotExist  # noqa
 
 
-__all__ = (
+_import = (
     'TranslatableModel',
     'TranslatedFields',
     'TranslatedFieldsModel',
     'TranslatedFieldsModelBase',
+)
+__all__ = _import + (
     'TranslationDoesNotExist',
-    #'create_translations_model',
 )
 
 # import a corresponding module from backend
@@ -72,5 +74,5 @@ _backend_path = '{0}.{1}'.format(appsettings.PARLER_BACKEND, _mod_name)
 _backend = import_module(_backend_path)
 
 # assign all publicly visible classes to this module's scope
-for cls in __all__:
+for cls in _import:
     vars()[cls] = getattr(_backend, cls)
